@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/post_comm_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageButton
+        android:id="@+id/user_avatar"
+        android:layout_width="60dp"
+        android:layout_height="60dp" />
+
+    <TextView
+        android:id="@+id/user_name"
+        android:textSize="18dp"
+        android:textColor="#5d5c5c"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/user_avatar"
+        android:layout_toEndOf="@+id/user_avatar"/>
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/user_name"
+        android:layout_toEndOf="@+id/user_avatar"/>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:layout_below="@id/text"
+        android:layout_toEndOf="@id/user_avatar">
+
+        <ImageButton
+            android:id="@+id/reply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/reply"
+            android:background="#00ffffff"/>
+        <TextView
+            android:id="@+id/count_like"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="5dp"/>
+        <ImageButton
+            android:id="@+id/set_like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/likes_gray"
+            android:background="#00ffffff"/>
+    </LinearLayout>
+
+</RelativeLayout>
