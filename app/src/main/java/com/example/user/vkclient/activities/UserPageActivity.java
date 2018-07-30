@@ -115,10 +115,11 @@ public class UserPageActivity extends AppCompatActivity implements UserPageMvp.V
 
     @Override
     public void acceptMoreUserPosts(UserPostModel userPostModel) {
+        int countItems = adapter.getItemCount();
         adapter.getProfiles().addAll(userPostModel.getResponse().getProfiles());
         adapter.getItems().addAll(userPostModel.getResponse().getItems());
         postsOffset = adapter.getItems().size();
-        adapter.notifyDataSetChanged();
+        adapter.notifyItemRangeInserted(countItems, userPostModel.getResponse().getCount());
         offPagination = true;
     }
 
