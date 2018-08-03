@@ -129,7 +129,7 @@ public class PostActivity extends AppCompatActivity implements PostActivityMVP.V
         comment.getLikes().setCount(0);
         comment.setId(id);
         comment.setFrom_id(App.getUserId());
-        adapter.getComments().add(comment);
+        adapter.getComments().add(0,comment);
         adapter.notifyDataSetChanged();
     }
 

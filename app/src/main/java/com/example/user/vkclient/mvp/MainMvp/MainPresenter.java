@@ -2,11 +2,14 @@ package com.example.user.vkclient.mvp.MainMvp;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 
 import com.example.user.vkclient.App;
 import com.example.user.vkclient.Utils;
 import com.example.user.vkclient.activities.MainActivity;
+import com.example.user.vkclient.fragments.UserFeedFragment;
 import com.example.user.vkclient.interfaces.CheckCallback;
+import com.example.user.vkclient.models.LastCommentModel;
 import com.example.user.vkclient.models.VerificationClasses.AccessLongPull;
 import com.example.user.vkclient.models.VerificationClasses.CheckingToken;
 import com.example.user.vkclient.models.VerificationClasses.ServiceAccessToken;
@@ -17,10 +20,12 @@ import com.google.gson.Gson;
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -36,7 +41,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
     private MainActivityMVP.View view;
     private MainActivityMVP.DataManager dataManager;
 
-    public MainPresenter(MainActivity activity) {
+    public MainPresenter(MainActivityMVP.View activity) {
         view = activity;
         dataManager = new MainDataManager();
     }
@@ -91,7 +96,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
                                        VKFeedResponse vkFeedResponse = gson.fromJson(object1.toString(), VKFeedResponse.class);
                                        App.setNextFrom(vkFeedResponse.getUser_feed().getNext_from());
                                        u.setVkFeedResponse(vkFeedResponse);
-                                       u.setLastComm(Utils.parse(object1.getJSONArray("lasts_comm_in_feed")));
+                                       u.setLastComm(parse(object1.getJSONArray("lasts_comm_in_feed")));
                                        view.acceptPaginationFeedArray(u.getVkFeedResponse(), u.getLastComm());
                                    } catch (JSONException e) {
                                        view.networkError("Ошибка во время запроса");
@@ -110,7 +115,6 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
     }
 
     public void getPostsWithLastComm() {
-        final UserFeed u = new UserFeed();
         dataManager.getPostsWithLastComm(Utils.getLastCommCode(App.getNextFrom()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -124,9 +128,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
                                        JSONObject object1 = new JSONObject(object.getJSONObject("response").toString());
                                        VKFeedResponse vkFeedResponse = gson.fromJson(object1.toString(), VKFeedResponse.class);
                                        App.setNextFrom(vkFeedResponse.getUser_feed().getNext_from());
-//                                       u.setVkFeedResponse(vkFeedResponse);
-//                                       u.setLastComm(Utils.parse(object1.getJSONArray("lasts_comm_in_feed")));
-                                       view.handleResponseFromUserFeed(vkFeedResponse, Utils.parse(object1.getJSONArray("lasts_comm_in_feed")));
+                                       view.handleResponseFromUserFeed(vkFeedResponse, parse(object1.getJSONArray("lasts_comm_in_feed")));
                                    } catch (JSONException e) {
                                        view.networkError("Ошибка во время запроса");
                                    } catch (IOException e) {
@@ -243,5 +245,30 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
     public void detachView() {
         super.detachView();
         view = null;
+    }
+
+
+    public static ArrayList<LastCommentModel> parse(JSONArray array) {
+        ArrayList<LastCommentModel> lastComm;
+        lastComm = new ArrayList<>();
+        try {
+            lastComm = new ArrayList<>(array.length());
+            for (int i = 0; i < array.length(); i++) {
+                LastCommentModel lastCommentModel = new LastCommentModel();
+                try {
+                    JSONArray comment = new JSONArray(array.get(i).toString());
+                    lastCommentModel.setPhotoURL(comment.get(0).toString());
+                    lastCommentModel.setName(comment.get(1).toString());
+                    lastCommentModel.setText(comment.get(2).toString());
+                    lastComm.add(lastCommentModel);
+                } catch (JSONException q) {
+                    lastCommentModel.setText(array.get(i).toString());
+                    lastComm.add(lastCommentModel);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return lastComm;
     }
 }

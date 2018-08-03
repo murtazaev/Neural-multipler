@@ -483,7 +483,7 @@ public class VKFeedResponse implements Parcelable {
                     public static class VKArrayPhoto implements Parcelable {
                         String type;
                         private String url;
-                        int width;
+                        private int width;
                         private int height;
 
                         public String getUrl() {
@@ -493,6 +493,8 @@ public class VKFeedResponse implements Parcelable {
                         public int getHeight() {
                             return height;
                         }
+
+                        public int getWidth(){return width;}
 
                         VKArrayPhoto(Parcel in){
                             type = in.readString();

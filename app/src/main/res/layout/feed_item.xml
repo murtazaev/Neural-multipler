@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="20dp"
@@ -57,15 +56,21 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/expand" />
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/collage_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/feed_image"/>
+
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="right"
+        android:gravity="end"
         android:orientation="horizontal"
         android:paddingBottom="4dp"
         android:paddingTop="5dp"
-        app:layout_constraintTop_toBottomOf="@+id/feed_image">
+        app:layout_constraintTop_toBottomOf="@+id/collage_image">
 
         <TextView
             android:id="@+id/count_repost"

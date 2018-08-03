@@ -3,4 +3,5 @@
     android:id="@+id/post_image"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
+    android:padding="1dp"
     android:layout_height="wrap_content"/>

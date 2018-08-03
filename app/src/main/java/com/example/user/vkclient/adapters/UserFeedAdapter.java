@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
@@ -19,10 +20,15 @@ import com.example.user.vkclient.activities.MainActivity;
 import com.example.user.vkclient.R;
 import com.example.user.vkclient.activities.PostActivity;
 import com.example.user.vkclient.dialogs.RepostDialog;
+import com.example.user.vkclient.fragments.UserFeedFragment;
 import com.example.user.vkclient.interfaces.CheckCallback;
 import com.example.user.vkclient.models.CommentsModel;
 import com.example.user.vkclient.models.LastCommentModel;
 import com.example.user.vkclient.models.VKFeedResponse;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -97,7 +103,7 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
 //            holder.lastComment.setText(lastComm.get(position));
 //        }
 
-        userLike(vkFeedObject.getLikes().getUser_likes(), holder.setLike, holder.isLike, holder.itemView);
+        userLike(vkFeedObject.getLikes().getUser_likes(), holder.setLike, holder.itemView, holder);
 
         holder.groupName.setText(vkFeedObject.getParentGroupName());
         holder.postDate.setText(new SimpleDateFormat("hh:mm:ss").format(new Date(vkFeedObject.getDate())));
@@ -105,25 +111,34 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
 
         try {
             loadIconGroup(holder.groupIcon, vkFeedObject.getParentGroupIcon());
-        } catch (NullPointerException ignore) { }
-
-        try {
-            loadPostImage(holder.feedImage, vkFeedObject.getAttachments()
-                    .get(0).getPhoto().getSizes().get(vkFeedObject.getAttachments()
-                            .get(0).getPhoto().getSizes().size() - 1)
-                    .getUrl());
-            holder.feedImage.setVisibility(View.VISIBLE);
-        } catch (NullPointerException i) {
-            try {
-                loadPostImage(holder.feedImage, vkFeedObject.getAttachments()
-                        .get(0).getLink().getPhoto().getSizes().
-                                get(vkFeedObject.getAttachments()
-                                        .get(0).getLink().getPhoto().getSizes().size() - 1)
-                        .getUrl());
-            } catch (NullPointerException ignore) {
-                holder.feedImage.setVisibility(View.GONE);
-            }
+        } catch (NullPointerException ignore) {
         }
+
+//        try {
+//            loadPostImage(holder.feedImage, vkFeedObject.getAttachments()
+//                    .get(0).getPhoto().getSizes().get(vkFeedObject.getAttachments()
+//                            .get(0).getPhoto().getSizes().size() - 1)
+//                    .getUrl());
+//            holder.feedImage.setVisibility(View.VISIBLE);
+//        } catch (NullPointerException i) {
+//            try {
+//                loadPostImage(holder.feedImage, vkFeedObject.getAttachments()
+//                        .get(0).getLink().getPhoto().getSizes().
+//                                get(vkFeedObject.getAttachments()
+//                                        .get(0).getLink().getPhoto().getSizes().size() - 1)
+//                        .getUrl());
+//            } catch (NullPointerException ignore) {
+//                holder.feedImage.setVisibility(View.GONE);
+//            }
+//        }
+
+        FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(holder.collageImage.getContext());
+        flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+        flexboxLayoutManager.setFlexWrap(FlexWrap.WRAP);
+        flexboxLayoutManager.setJustifyContent(JustifyContent.CENTER);
+        holder.collageImage.setLayoutManager(flexboxLayoutManager);
+        if (vkFeedObject.getAttachments() != null)
+            holder.collageImage.setAdapter(new CollageImageAdapter(vkFeedObject.getAttachments()));
 
 //        if (holder.feedText.isExpanded()) {
 //            holder.expand.setText("Свернуть");
@@ -159,13 +174,13 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
         }
     }
 
-    private void userLike(int userLike, ImageButton setLike, boolean isLike, View itemView) {
+    private void userLike(int userLike, ImageButton setLike, View itemView, UserFeedViewHolder holder) {
         if (userLike == 1) {
             setLike.setImageDrawable(itemView.getContext().getResources().getDrawable(R.drawable.likes_red));
-            isLike = true;
+            holder.isLike = true;
         } else {
             setLike.setImageDrawable(itemView.getContext().getResources().getDrawable(R.drawable.likes_gray));
-            isLike = false;
+            holder.isLike = false;
         }
     }
 
@@ -190,6 +205,7 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
         ImageView feedImage;
         ImageButton setLike, comments, groupIcon, repost;
         ExpandableTextView feedText;
+        RecyclerView collageImage;
 
         int ownerId, postId;
         String accessKey, type;
@@ -210,6 +226,7 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
             countLike = itemView.findViewById(R.id.count_like);
             repost = itemView.findViewById(R.id.repost);
             countRepost = itemView.findViewById(R.id.count_repost);
+            collageImage = itemView.findViewById(R.id.collage_image);
 
             setLike.setOnClickListener(this);
             comments.setOnClickListener(this);
@@ -223,10 +240,12 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
                 case R.id.set_like:
                     if (type.equals("post")) {
                         if (!isLike) {
-                            ((MainActivity) itemView.getContext()).setLike(type, ownerId, postId, accessKey, this);
+                            //((MainActivity) itemView.getContext()).setLike(type, ownerId, postId, accessKey, this);
+                            ((UserFeedFragment)((MainActivity)itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).setLike(type, ownerId, postId, accessKey, this);
                             isLike = true;
                         } else {
-                            ((MainActivity) itemView.getContext()).deleteLike(type, ownerId, postId, this);
+                            //((MainActivity) itemView.getContext()).deleteLike(type, ownerId, postId, this);
+                            ((UserFeedFragment)((MainActivity)itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).deleteLike(type, ownerId, postId, this);
                             isLike = false;
                         }
                     }
@@ -235,7 +254,7 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
                     Intent intent = new Intent(itemView.getContext(), PostActivity.class)
                             .putExtra("feedResponse", feedResponses.get(getAdapterPosition()))
                             .putExtra("pos", getAdapterPosition());
-                    ((MainActivity) itemView.getContext()).startActivityForResult(intent, 1);
+                    ((MainActivity)itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag).startActivityForResult(intent, 1);
                     break;
                 case R.id.repost:
                     RepostDialog repostDialog = new RepostDialog();

@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.example.user.vkclient.App;
 import com.example.user.vkclient.EndlessRecyclerViewScrollListener;
+import com.example.user.vkclient.fragments.UserFeedFragment;
 import com.example.user.vkclient.mvp.MainMvp.MainActivityMVP;
 import com.example.user.vkclient.mvp.MainMvp.MainPresenter;
 import com.example.user.vkclient.R;
@@ -33,12 +34,12 @@ import com.vk.sdk.api.VKError;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements MainActivityMVP.View {
+public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView userFeed;
-    private MainPresenter presenter;
-    private UserFeedAdapter adapter;
+
     private ProgressBar progressBar;
+
+    private UserFeedFragment userFeedFragment = new UserFeedFragment();
 
 
     @Override
@@ -46,21 +47,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityMVP.V
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        initFields();
+
+        getSupportFragmentManager().beginTransaction().add(R.id.user_feed_frag, userFeedFragment).commit();
 
         progressBar.getIndeterminateDrawable().setColorFilter(Color.BLUE, PorterDuff.Mode.SRC_IN);
-        userFeed.setHasFixedSize(true);
-        userFeed.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        userFeed.addOnScrollListener(new EndlessRecyclerViewScrollListener((LinearLayoutManager) userFeed.getLayoutManager()) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                presenter.loadMoreUserFeedItems();
-                TransitionManager.beginDelayedTransition((ViewGroup)progressBar.getParent(), new Slide(Gravity.BOTTOM).setDuration(100));
-                progressBar.setVisibility(View.VISIBLE);
-            }
-        });
-        presenter.attachView(this);
-        presenter.onCheckToken();
     }
 
 
@@ -80,86 +70,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityMVP.V
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
-        if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
-            @Override
-            public void onResult(VKAccessToken res) {
-                (App.getSharedPrefHelper()).saveToken(res.accessToken);
-                App.getSharedPrefHelper().saveUserId(Integer.parseInt(res.userId));
-                App.setUserId(App.getSharedPrefHelper().getUserId());
-                presenter.onCheckToken();
-            }
-
-            @Override
-            public void onError(VKError error) {
-                Toast.makeText(MainActivity.this, "Произошла ошибка во время авторизации", Toast.LENGTH_SHORT).show();
-            }
-        }));
-
-        if(requestCode == 1){
-            try {
-                VKFeedResponse.Response.VKFeedObject vkFeedObject = data.getParcelableExtra("feedResponse");
-                int pos = data.getIntExtra("pos", 0);
-                adapter.getFeedResponses().remove(pos);
-                adapter.getFeedResponses().add(pos, vkFeedObject);
-                adapter.notifyItemChanged(pos);
-            }catch (NullPointerException ignore){}
-        }
-    }
-
-
-    @Override
-    public void handleResponseFromCheckingUserAccessToken(int success) {
-        if (success == 1) {
-            presenter.getPostsWithLastComm();
-        } else {
-            presenter.VKLogin();
-        }
-    }
-
-    @Override
-    public void networkError(String error) {
-        Toast.makeText(this, error, Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void handleResponseFromUserFeed(VKFeedResponse vkFeedResponse, ArrayList<LastCommentModel> lastComm) {
-        adapter = new UserFeedAdapter(vkFeedResponse, lastComm);
-        userFeed.setAdapter(adapter);
-    }
-
-    @Override
-    public void acceptPaginationFeedArray(VKFeedResponse vkFeedResponse, ArrayList<LastCommentModel> lastComm) {
-        adapter.getFeedResponses().addAll(vkFeedResponse.getUser_feed().getItems());
-        adapter.getLastComm().addAll(lastComm);
-        adapter.pickOutGroupId();
-        adapter.notifyDataSetChanged();
-        TransitionManager.beginDelayedTransition((ViewGroup)progressBar.getParent(), new Slide(Gravity.BOTTOM).setDuration(100));
-        progressBar.setVisibility(View.GONE);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-    }
-
-
-
     private void initViews() {
-        userFeed = findViewById(R.id.user_feed);
         progressBar = findViewById(R.id.progress_bar);
-    }
-    private void initFields() {
-        presenter = new MainPresenter(this);
-    }
-
-
-    public void setLike(String type, int ownerId, int itemId, String accessKey, CheckCallback checkCallback) {
-        presenter.setLike(type, ownerId, itemId, accessKey, checkCallback);
-    }
-    public void deleteLike(String type, int ownerId, int itemId, CheckCallback checkCallback) {
-        presenter.deleteLike(type, ownerId, itemId, checkCallback);
     }
 }
