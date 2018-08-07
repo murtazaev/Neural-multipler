@@ -27,7 +27,6 @@ import com.example.user.vkclient.models.LastCommentModel;
 import com.example.user.vkclient.models.VKFeedResponse;
 import com.example.user.vkclient.mvp.MainMvp.MainActivityMVP;
 import com.example.user.vkclient.mvp.MainMvp.MainPresenter;
-import com.example.user.vkclient.mvp.PostActivityMvp.PostActivityMVP;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKSdk;
@@ -43,7 +42,7 @@ public class UserFeedFragment extends Fragment implements MainActivityMVP.View {
     private ProgressBar progressBar;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_user_feed, container, false);
     }
@@ -60,12 +59,17 @@ public class UserFeedFragment extends Fragment implements MainActivityMVP.View {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 presenter.loadMoreUserFeedItems();
-                TransitionManager.beginDelayedTransition((ViewGroup)progressBar.getParent(), new Slide(Gravity.BOTTOM).setDuration(100));
+                TransitionManager.beginDelayedTransition((ViewGroup) progressBar.getParent(), new Slide(Gravity.BOTTOM).setDuration(100));
                 progressBar.setVisibility(View.VISIBLE);
             }
         });
         presenter.attachView(this);
-        presenter.onCheckToken();
+        if (savedInstanceState == null) {
+            presenter.onCheckToken();
+        }else {
+            adapter = ((MainActivity)getActivity()).dataFragGetData();
+            userFeed.setAdapter(adapter);
+        }
     }
 
     @Override
@@ -83,17 +87,24 @@ public class UserFeedFragment extends Fragment implements MainActivityMVP.View {
             public void onError(VKError error) {
                 Toast.makeText(getContext(), "Произошла ошибка во время авторизации", Toast.LENGTH_SHORT).show();
             }
-        }));
+        })) ;
 
-        if(requestCode == 1){
+        if (requestCode == 1) {
             try {
                 VKFeedResponse.Response.VKFeedObject vkFeedObject = data.getParcelableExtra("feedResponse");
                 int pos = data.getIntExtra("pos", 0);
                 adapter.getFeedResponses().remove(pos);
                 adapter.getFeedResponses().add(pos, vkFeedObject);
                 adapter.notifyItemChanged(pos);
-            }catch (NullPointerException ignore){}
+            } catch (NullPointerException ignore) {
+            }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("q", "q");
     }
 
     @Override
@@ -108,6 +119,7 @@ public class UserFeedFragment extends Fragment implements MainActivityMVP.View {
     @Override
     public void handleResponseFromUserFeed(VKFeedResponse vkFeedResponse, ArrayList<LastCommentModel> lastComm) {
         adapter = new UserFeedAdapter(vkFeedResponse, lastComm);
+        ((MainActivity) getActivity()).dataFragSetData(adapter);
         userFeed.setAdapter(adapter);
     }
 
@@ -117,7 +129,7 @@ public class UserFeedFragment extends Fragment implements MainActivityMVP.View {
         adapter.getLastComm().addAll(lastComm);
         adapter.pickOutGroupId();
         adapter.notifyDataSetChanged();
-        TransitionManager.beginDelayedTransition((ViewGroup)progressBar.getParent(), new Slide(Gravity.BOTTOM).setDuration(100));
+        TransitionManager.beginDelayedTransition((ViewGroup) progressBar.getParent(), new Slide(Gravity.BOTTOM).setDuration(100));
         progressBar.setVisibility(View.GONE);
     }
 
@@ -136,6 +148,7 @@ public class UserFeedFragment extends Fragment implements MainActivityMVP.View {
         userFeed = container.findViewById(R.id.user_feed);
         progressBar = container.findViewById(R.id.progress_bar);
     }
+
     private void initFields() {
         presenter = new MainPresenter(this);
     }
@@ -143,6 +156,7 @@ public class UserFeedFragment extends Fragment implements MainActivityMVP.View {
     public void setLike(String type, int ownerId, int itemId, String accessKey, CheckCallback checkCallback) {
         presenter.setLike(type, ownerId, itemId, accessKey, checkCallback);
     }
+
     public void deleteLike(String type, int ownerId, int itemId, CheckCallback checkCallback) {
         presenter.deleteLike(type, ownerId, itemId, checkCallback);
     }

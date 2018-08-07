@@ -2,6 +2,6 @@
     <string name="app_name">VKClient</string>
     <string name="massages">Сообщения</string>
     <integer name="com_vk_sdk_AppId">6621916</integer>
-    
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -1,9 +1,8 @@
 package com.example.user.vkclient.mvp.PostActivityMvp;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 
-import com.example.user.vkclient.activities.PostActivity;
+import com.example.user.vkclient.fragments.PostFragment;
 import com.example.user.vkclient.interfaces.CheckCallback;
 import com.example.user.vkclient.models.CommentsModel;
 import com.example.user.vkclient.mvp.global.MvpPresenter;
@@ -25,7 +24,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
     private PostActivityMVP.View view;
     private PostActivityMVP.DataManager dataManager;
 
-    public PostActivityPresenter(PostActivity activity) {
+    public PostActivityPresenter(PostActivityMVP.View activity) {
         view = activity;
         dataManager = new PostActivityDataManager();
     }
@@ -36,13 +35,13 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<CommentsModel>() {
                                @Override
-                               public void accept(CommentsModel commentsModel) throws Exception {
+                               public void accept(CommentsModel commentsModel) {
                                    view.setComments(commentsModel);
                                }
                            },
                         new Consumer<Throwable>() {
                             @Override
-                            public void accept(Throwable throwable) throws Exception {
+                            public void accept(Throwable throwable) {
                                 view.networkError("Нет интернета");
                             }
                         });
@@ -54,12 +53,12 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<CommentsModel>() {
                     @Override
-                    public void accept(CommentsModel commentsModel) throws Exception {
+                    public void accept(CommentsModel commentsModel){
                         view.acceptMoreComments(commentsModel);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable) {
                         view.networkError("Нет интернета");
                     }
                 });
@@ -116,7 +115,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
                            },
                         new Consumer<Throwable>() {
                             @Override
-                            public void accept(Throwable throwable) throws Exception {
+                            public void accept(Throwable throwable) {
                                 view.networkError("Нет интернета");
                             }
                         });
@@ -128,7 +127,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
                                @Override
-                               public void accept(ResponseBody responseBody) throws Exception {
+                               public void accept(ResponseBody responseBody) {
                                    try {
                                        JSONObject object = new JSONObject(responseBody.string());
                                        int i = Integer.parseInt(object.get("response").toString());
@@ -144,7 +143,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
                            },
                         new Consumer<Throwable>() {
                             @Override
-                            public void accept(Throwable throwable) throws Exception {
+                            public void accept(Throwable throwable) {
                                 view.networkError("Нет интернета");
                             }
                         });
@@ -173,7 +172,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable){
                         view.networkError("Нет интернета");
                     }
                 });
@@ -186,7 +185,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
                     @Override
-                    public void accept(ResponseBody responseBody) throws Exception {
+                    public void accept(ResponseBody responseBody) {
                         try {
                             JSONObject object = new JSONObject(responseBody.string());
                             JSONObject object1 = new JSONObject(object.get("response").toString());
@@ -202,14 +201,14 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable) {
                         view.networkError("Нет интернета");
                     }
                 });
     }
 
     public RequestCreator loadImage(String url) {
-        return Picasso.with((Context) getView())
+        return Picasso.with(((PostFragment)getView()).getContext())
                 .load(url);
     }
 

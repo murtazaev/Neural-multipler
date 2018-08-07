@@ -81,7 +81,6 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
 
     public void loadMoreUserFeedItems() {
         final UserFeed u = new UserFeed();
-        String o = App.getNextFrom();
         dataManager.getPostsWithLastComm(Utils.getLastCommCode(App.getNextFrom()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -89,7 +88,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
                                @Override
                                public void accept(ResponseBody responseBody) {
                                    Gson gson = new Gson();
-                                   JSONObject object = null;
+                                   JSONObject object;
                                    try {
                                        object = new JSONObject(responseBody.string());
                                        JSONObject object1 = new JSONObject(object.getJSONObject("response").toString());
@@ -122,7 +121,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
                                @Override
                                public void accept(ResponseBody responseBody) {
                                    Gson gson = new Gson();
-                                   JSONObject object = null;
+                                   JSONObject object;
                                    try {
                                        object = new JSONObject(responseBody.string());
                                        JSONObject object1 = new JSONObject(object.getJSONObject("response").toString());
@@ -168,7 +167,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable) {
                         view.networkError("Нет интернета");
                     }
                 });
@@ -248,7 +247,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
     }
 
 
-    public static ArrayList<LastCommentModel> parse(JSONArray array) {
+    private static ArrayList<LastCommentModel> parse(JSONArray array) {
         ArrayList<LastCommentModel> lastComm;
         lastComm = new ArrayList<>();
         try {

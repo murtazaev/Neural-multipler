@@ -4,9 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,13 +29,13 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import at.blogc.android.views.ExpandableTextView;
 
+@SuppressLint({"SimpleDateFormat", "SetTextI18n"})
 public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFeedViewHolder> {
 
     private ArrayList<VKFeedResponse.Response.VKFeedObject> feedResponses;
@@ -77,7 +75,7 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
         return new UserFeedViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_item, parent, false));
     }
 
-    @SuppressLint("SimpleDateFormat")
+
     @Override
     public void onBindViewHolder(@NonNull UserFeedViewHolder holder, int position) {
         VKFeedResponse.Response.VKFeedObject vkFeedObject = feedResponses.get(position);
@@ -240,11 +238,9 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
                 case R.id.set_like:
                     if (type.equals("post")) {
                         if (!isLike) {
-                            //((MainActivity) itemView.getContext()).setLike(type, ownerId, postId, accessKey, this);
                             ((UserFeedFragment)((MainActivity)itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).setLike(type, ownerId, postId, accessKey, this);
                             isLike = true;
                         } else {
-                            //((MainActivity) itemView.getContext()).deleteLike(type, ownerId, postId, this);
                             ((UserFeedFragment)((MainActivity)itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).deleteLike(type, ownerId, postId, this);
                             isLike = false;
                         }

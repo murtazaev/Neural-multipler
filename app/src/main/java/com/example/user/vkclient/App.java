@@ -51,7 +51,8 @@ public class App extends android.app.Application {
 
     public static String getNextFrom() {
         return nextFrom;
-    }public static void setNextFrom(String nextFrom) {
+    }
+    public static void setNextFrom(String nextFrom) {
         App.nextFrom = nextFrom;
     }
 
