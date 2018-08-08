@@ -31,7 +31,7 @@ public class UserPagePresenter extends MvpPresenter<UserPageMvp.View> {
     private UserPageMvp.View view;
     private UserPageMvp.DataManager dataManager;
 
-    public UserPagePresenter(UserPageActivity activity){
+    public UserPagePresenter(UserPageMvp.View activity){
         view = activity;
         dataManager = new UserPageDataManager();
     }

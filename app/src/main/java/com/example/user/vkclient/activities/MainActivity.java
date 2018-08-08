@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             userFeedFragment = new UserFeedFragment();
             getSupportFragmentManager().beginTransaction().add(R.id.user_feed_frag, userFeedFragment, FEED_FRAG_TAG).commit();
         }
-        progressBar.getIndeterminateDrawable().setColorFilter(Color.BLUE, PorterDuff.Mode.SRC_IN);
+        //progressBar.getIndeterminateDrawable().setColorFilter(Color.BLUE, PorterDuff.Mode.SRC_IN);
     }
 
 

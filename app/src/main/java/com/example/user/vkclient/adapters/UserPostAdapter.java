@@ -1,5 +1,6 @@
 package com.example.user.vkclient.adapters;
 
+import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
@@ -17,6 +18,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+@SuppressLint("SetTextI18n")
 public class UserPostAdapter extends RecyclerView.Adapter<UserPostAdapter.UserPostViewHolder> {
 
     private ArrayList<UserPostModel.UserPosts.Item> items;
@@ -75,6 +77,7 @@ public class UserPostAdapter extends RecyclerView.Adapter<UserPostAdapter.UserPo
             text.setVisibility(View.VISIBLE);
             text.setText(items.get(position).getText());
         } else text.setVisibility(View.GONE);
+        text.setText(position+" ");
     }
 
     private void postImage(ImageView postImage, String urlImage) {

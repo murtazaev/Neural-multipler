@@ -27,10 +27,9 @@
             android:theme="@style/VK.Transparent" />
         <activity
             android:name=".activities.PostActivity"
-            android:parentActivityName=".activities.MainActivity" />
+            />
         <activity
             android:name=".activities.UserPageActivity"
-            android:parentActivityName=".activities.PostActivity"
             android:theme="@style/CoordinatorTheme" />
     </application>
 
