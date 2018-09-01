@@ -13,4 +13,6 @@ public interface VKApiExecuteMethod {
 
     @GET("method/execute")
     Single<ResponseBody> sharePost(@Query("code") String code);
+
+
 }

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
@@ -30,6 +31,7 @@ public class UserPagePresenter extends MvpPresenter<UserPageMvp.View> {
 
     private UserPageMvp.View view;
     private UserPageMvp.DataManager dataManager;
+    Disposable disposable;
 
     public UserPagePresenter(UserPageMvp.View activity){
         view = activity;
@@ -37,7 +39,7 @@ public class UserPagePresenter extends MvpPresenter<UserPageMvp.View> {
     }
 
     public void getUserProfile(int ids, String fields, String nameCase){
-        dataManager.getUserProfile(ids, fields, nameCase)
+        disposable = dataManager.getUserProfile(ids, fields, nameCase)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<UserProfile>() {
@@ -54,7 +56,7 @@ public class UserPagePresenter extends MvpPresenter<UserPageMvp.View> {
     }
 
     public void getUserFriends(int id, String fields){
-        dataManager.getUserFriends(id, fields)
+        disposable = dataManager.getUserFriends(id, fields)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<FriendsModel>() {
@@ -71,7 +73,7 @@ public class UserPagePresenter extends MvpPresenter<UserPageMvp.View> {
     }
 
     public void getUserPosts(int ownerId, int extended, String fields, int offset){
-        dataManager.getUserPosts(ownerId, extended, fields, offset)
+        disposable = dataManager.getUserPosts(ownerId, extended, fields, offset)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<UserPostModel>() {
@@ -89,7 +91,7 @@ public class UserPagePresenter extends MvpPresenter<UserPageMvp.View> {
 
 
     public void getMoreUserPosts(int ownerId, int extended, String fields, int offset){
-        dataManager.getMoreUserPosts(ownerId, extended, fields, offset)
+        disposable = dataManager.getMoreUserPosts(ownerId, extended, fields, offset)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<UserPostModel>() {
@@ -109,6 +111,7 @@ public class UserPagePresenter extends MvpPresenter<UserPageMvp.View> {
     @Override
     public void detachView() {
         super.detachView();
+        disposable.dispose();
         view = null;
     }
 }

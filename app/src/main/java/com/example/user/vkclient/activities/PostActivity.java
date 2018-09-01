@@ -8,16 +8,22 @@ import android.view.MenuItem;
 
 
 import com.example.user.vkclient.R;
+import com.example.user.vkclient.adapters.PostCommentsAdapter;
+import com.example.user.vkclient.fragments.DataFragment;
 import com.example.user.vkclient.fragments.PostFragment;
 import com.example.user.vkclient.interfaces.FragmentsBackPressed;
+import com.example.user.vkclient.models.CommentsModel;
 
 
 @SuppressLint("SetTextI18n")
 public class PostActivity extends AppCompatActivity {
 
     PostFragment postFragment;
+    DataFragment dataFragment;
+
     FragmentsBackPressed.ReturnVKFeedObject returnVKFeedObject;
     private String POST_FRAG = "tag1";
+    private String DATA_FRAG = "tag2";
 
     @SuppressLint({"SetTextI18n", "SimpleDateFormat"})
     @Override
@@ -26,6 +32,14 @@ public class PostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        dataFragment = (DataFragment) getSupportFragmentManager().findFragmentByTag(DATA_FRAG);
+
+        if(dataFragment == null){
+            dataFragment = new DataFragment();
+            getSupportFragmentManager().beginTransaction().add(dataFragment, DATA_FRAG).commit();
+        }
+
 
         postFragment = (PostFragment) getSupportFragmentManager().findFragmentByTag(POST_FRAG);
         returnVKFeedObject = postFragment;
@@ -58,5 +72,12 @@ public class PostActivity extends AppCompatActivity {
         i.putExtra("pos", getIntent().getIntExtra("pos", 0));
         setResult(RESULT_OK, i);
         finish();
+    }
+
+    public void setCommentsToDataFrag(PostCommentsAdapter postCommentsAdapter){
+        dataFragment.setPostCommentsAdapter(postCommentsAdapter);
+    }
+    public PostCommentsAdapter getCommentsToDataFrag(){
+        return dataFragment.getPostCommentsAdapter();
     }
 }

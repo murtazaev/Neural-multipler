@@ -13,6 +13,9 @@ import com.example.user.vkclient.retrofit.VKApiLongPullRequest;
 import com.example.user.vkclient.retrofit.VKApiSecureMethods;
 
 import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.internal.disposables.SequentialDisposable;
+import io.reactivex.subscribers.DisposableSubscriber;
 import okhttp3.ResponseBody;
 
 public class MainDataManager implements MainActivityMVP.DataManager{

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
@@ -23,6 +24,7 @@ public class RepostDialogPresenter extends MvpPresenter<RepostDialogMvp.View> {
 
     private RepostDialogMvp.View view;
     private RepostDialogMvp.DataManager dataManager;
+    Disposable disposable;
 
     public RepostDialogPresenter(RepostDialog dialog) {
         view = dialog;
@@ -31,7 +33,7 @@ public class RepostDialogPresenter extends MvpPresenter<RepostDialogMvp.View> {
 
 
     public void getConversations(int offset, int count, String filter, int extended) {
-        dataManager.getConversations(offset, count, filter, extended)
+        disposable = dataManager.getConversations(offset, count, filter, extended)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ConversationModel>() {
@@ -64,7 +66,7 @@ public class RepostDialogPresenter extends MvpPresenter<RepostDialogMvp.View> {
     }
 
     public void repost(String object, String message) {
-        dataManager.repost(object, message)
+        disposable = dataManager.repost(object, message)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -93,7 +95,7 @@ public class RepostDialogPresenter extends MvpPresenter<RepostDialogMvp.View> {
 
 
     public void sahrePost(StringBuffer ids, StringBuffer types, String postUrl, String message) {
-        dataManager.sharePost(ids, types, postUrl, message)
+        disposable = dataManager.sharePost(ids, types, postUrl, message)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -152,6 +154,7 @@ public class RepostDialogPresenter extends MvpPresenter<RepostDialogMvp.View> {
     @Override
     public void detachView() {
         super.detachView();
+        disposable.dispose();
         view = null;
     }
 }

@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
@@ -23,6 +24,7 @@ import okhttp3.ResponseBody;
 public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
     private PostActivityMVP.View view;
     private PostActivityMVP.DataManager dataManager;
+    Disposable disposable;
 
     public PostActivityPresenter(PostActivityMVP.View activity) {
         view = activity;
@@ -30,7 +32,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
     }
 
     public void getComments(int ownerId, int postId, int needLikes, String sort, int extended, int startComm, int offset) {
-        dataManager.getPostComments(ownerId, postId, needLikes, sort, extended, startComm, offset)
+        disposable = dataManager.getPostComments(ownerId, postId, needLikes, sort, extended, startComm, offset)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<CommentsModel>() {
@@ -48,7 +50,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
     }
 
     public void loadMorecomments(int ownerId, int postId, int needLikes, String sort, int extended, int startComm, int offset){
-        dataManager.getPostComments(ownerId, postId, needLikes, sort, extended, startComm, offset)
+        disposable = dataManager.getPostComments(ownerId, postId, needLikes, sort, extended, startComm, offset)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<CommentsModel>() {
@@ -65,7 +67,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
     }
 
     public void sendMessage(int ownerId, int post_id, final String message, int replyToComm) {
-        dataManager.sendMassage(ownerId, post_id, message, replyToComm)
+        disposable = dataManager.sendMassage(ownerId, post_id, message, replyToComm)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -94,7 +96,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
     }
 
     public void editComment(int ownerId, int commId, final String message, final CheckCallback.CommCheck commCheck, final int position) {
-        dataManager.editComment(ownerId, commId, message)
+        disposable = dataManager.editComment(ownerId, commId, message)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -122,7 +124,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
     }
 
     public void deleteComment(int ownerId, int commId, final CheckCallback.CommCheck commCheck, final int position) {
-        dataManager.deleteComment(ownerId, commId)
+        disposable = dataManager.deleteComment(ownerId, commId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -151,7 +153,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
 
 
     public void setLike(String type, final int ownerId, int itemId, String accessKey, final CheckCallback checkCallback) {
-        dataManager.setLike(type, ownerId, itemId, accessKey)
+        disposable = dataManager.setLike(type, ownerId, itemId, accessKey)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -180,7 +182,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
 
 
     public void deleteLike(String type, int ownerId, int itemId, final CheckCallback checkCallback) {
-        dataManager.deleteLike(type, ownerId, itemId)
+        disposable = dataManager.deleteLike(type, ownerId, itemId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -215,6 +217,7 @@ public class PostActivityPresenter extends MvpPresenter<PostActivityMVP.View> {
     @Override
     public void detachView() {
         super.detachView();
+        disposable.dispose();
         view = null;
     }
 }

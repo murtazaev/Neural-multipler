@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,17 +24,28 @@ import com.example.user.vkclient.interfaces.CheckCallback;
 import com.example.user.vkclient.models.CommentsModel;
 import com.example.user.vkclient.models.LastCommentModel;
 import com.example.user.vkclient.models.VKFeedResponse;
+import com.example.user.vkclient.observablepattern.EventManager;
+import com.example.user.vkclient.observablepattern.Subscribers;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.squareup.picasso.Picasso;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import at.blogc.android.views.ExpandableTextView;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 
 @SuppressLint({"SimpleDateFormat", "SetTextI18n"})
 public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFeedViewHolder> {
@@ -198,7 +210,7 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
     }
 
 
-    class UserFeedViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, CheckCallback {
+    class UserFeedViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, CheckCallback, Subscribers {
         TextView expand, lastComment, groupName, postDate, countComments, countLike, countRepost;
         ImageView feedImage;
         ImageButton setLike, comments, groupIcon, repost;
@@ -208,6 +220,8 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
         int ownerId, postId;
         String accessKey, type;
         boolean isLike;
+
+        EventManager manager;
 
         UserFeedViewHolder(final View itemView) {
             super(itemView);
@@ -225,6 +239,10 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
             repost = itemView.findViewById(R.id.repost);
             countRepost = itemView.findViewById(R.id.count_repost);
             collageImage = itemView.findViewById(R.id.collage_image);
+            manager = new EventManager();
+
+            manager.subscribe("1", this);
+
 
             setLike.setOnClickListener(this);
             comments.setOnClickListener(this);
@@ -236,21 +254,22 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.set_like:
-                    if (type.equals("post")) {
-                        if (!isLike) {
-                            ((UserFeedFragment)((MainActivity)itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).setLike(type, ownerId, postId, accessKey, this);
-                            isLike = true;
-                        } else {
-                            ((UserFeedFragment)((MainActivity)itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).deleteLike(type, ownerId, postId, this);
-                            isLike = false;
-                        }
-                    }
+//                    if (type.equals("post")) {
+//                        if (!isLike) {
+//                            ((UserFeedFragment) ((MainActivity) itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).setLike(type, ownerId, postId, accessKey, this);
+//                            isLike = true;
+//                        } else {
+//                            ((UserFeedFragment) ((MainActivity) itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).deleteLike(type, ownerId, postId, this);
+//                            isLike = false;
+//                        }
+//                    }
+                    manager.notifyed(v);
                     break;
                 case R.id.to_comments:
                     Intent intent = new Intent(itemView.getContext(), PostActivity.class)
                             .putExtra("feedResponse", feedResponses.get(getAdapterPosition()))
                             .putExtra("pos", getAdapterPosition());
-                    ((MainActivity)itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag).startActivityForResult(intent, 1);
+                    ((MainActivity) itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag).startActivityForResult(intent, 1);
                     break;
                 case R.id.repost:
                     RepostDialog repostDialog = new RepostDialog();
@@ -285,6 +304,23 @@ public class UserFeedAdapter extends RecyclerView.Adapter<UserFeedAdapter.UserFe
                 feedResponses.get(getAdapterPosition()).getLikes().setCount(feedResponses.get(getAdapterPosition()).getLikes().getCount() - 1);
                 feedResponses.get(getAdapterPosition()).getLikes().setUser_likes(0);
                 countLike.setText(feedResponses.get(getAdapterPosition()).getLikes().getCount() + "");
+            }
+        }
+
+        @Override
+        public void accept(View view) {
+            switch (view.getId()){
+                case R.id.set_like:
+                    if (type.equals("post")) {
+                        if (!isLike) {
+                            ((UserFeedFragment) ((MainActivity) itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).setLike(type, ownerId, postId, accessKey, this);
+                            isLike = true;
+                        } else {
+                            ((UserFeedFragment) ((MainActivity) itemView.getContext()).getSupportFragmentManager().findFragmentById(R.id.user_feed_frag)).deleteLike(type, ownerId, postId, this);
+                            isLike = false;
+                        }
+                    }
+                    break;
             }
         }
     }

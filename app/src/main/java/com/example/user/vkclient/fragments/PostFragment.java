@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.user.vkclient.App;
 import com.example.user.vkclient.R;
+import com.example.user.vkclient.activities.PostActivity;
 import com.example.user.vkclient.adapters.PostCommentsAdapter;
 import com.example.user.vkclient.dialogs.RepostDialog;
 import com.example.user.vkclient.interfaces.CheckCallback;
@@ -46,6 +47,7 @@ public class PostFragment extends Fragment implements PostActivityMVP.View, View
 
     private int replyCommId;
     private int commentsOffset = 0;
+    private int commentsCount = 0;
 
     private VKFeedResponse.Response.VKFeedObject vkFeedObject;
 
@@ -65,9 +67,6 @@ public class PostFragment extends Fragment implements PostActivityMVP.View, View
         initFields();
 
         presenter.attachView(this);
-        presenter.getComments(vkFeedObject.getSource_id(),
-                vkFeedObject.getPost_id(),
-                1, "desc", 1, 0, 0);
 
         loadPostImage();
         presenter.loadImage(vkFeedObject.getParentGroupIcon()).into(iconGroup);
@@ -80,11 +79,30 @@ public class PostFragment extends Fragment implements PostActivityMVP.View, View
         postDate.setText(new SimpleDateFormat("hh:mm:ss").format(new Date(vkFeedObject.getDate())));
 
         recyclerComments.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, true));
+
+        if (((PostActivity) getActivity()).getCommentsToDataFrag() == null) {
+            presenter.getComments(vkFeedObject.getSource_id(),
+                    vkFeedObject.getPost_id(),
+                    1, "desc", 1, 0, 0);
+        }else {
+            commentsOffset = savedInstanceState.getInt("offset");
+            commentsCount = savedInstanceState.getInt("commentsCount");
+            adapter = ((PostActivity)getActivity()).getCommentsToDataFrag();
+            recyclerComments.setAdapter(adapter);
+            numberOfAvailableComments(commentsCount);
+        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("offset", commentsOffset);
+        outState.putInt("commentsCount", commentsCount);
     }
 
     @Override
@@ -145,8 +163,10 @@ public class PostFragment extends Fragment implements PostActivityMVP.View, View
         allotmentNameAndPhoto(comments);
         commentsOffset = comments.getResponse().getItems().size();
         adapter = new PostCommentsAdapter(comments.getResponse().getItems(), vkFeedObject.getSource_id());
+        ((PostActivity) getActivity()).setCommentsToDataFrag(adapter);
         recyclerComments.setAdapter(adapter);
         numberOfAvailableComments(comments.getResponse().getCount());
+        commentsCount = comments.getResponse().getCount();
     }
 
     @Override
@@ -155,6 +175,7 @@ public class PostFragment extends Fragment implements PostActivityMVP.View, View
         commentsOffset = adapter.getComments().size() + comments.getResponse().getItems().size();
         adapter.addComments(comments.getResponse().getItems());
         numberOfAvailableComments(comments.getResponse().getCount());
+        commentsCount = comments.getResponse().getCount();
     }
 
     @Override
@@ -250,7 +271,8 @@ public class PostFragment extends Fragment implements PostActivityMVP.View, View
                         .into(postImage);
 
             }
-        } catch (NullPointerException ignore) { }
+        } catch (NullPointerException ignore) {
+        }
     }
 
 

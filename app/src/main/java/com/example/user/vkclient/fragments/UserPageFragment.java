@@ -64,6 +64,7 @@ public class UserPageFragment extends Fragment implements UserPageMvp.View {
 
         userPosts.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         userPosts.setNestedScrollingEnabled(false);
+        userPosts.setHasFixedSize(false);
         nestedScrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
             @Override
             public void onScrollChanged()

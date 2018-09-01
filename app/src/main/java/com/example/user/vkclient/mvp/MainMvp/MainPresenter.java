@@ -2,12 +2,9 @@ package com.example.user.vkclient.mvp.MainMvp;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 
 import com.example.user.vkclient.App;
 import com.example.user.vkclient.Utils;
-import com.example.user.vkclient.activities.MainActivity;
-import com.example.user.vkclient.fragments.UserFeedFragment;
 import com.example.user.vkclient.interfaces.CheckCallback;
 import com.example.user.vkclient.models.LastCommentModel;
 import com.example.user.vkclient.models.VerificationClasses.AccessLongPull;
@@ -29,6 +26,7 @@ import java.util.ArrayList;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
@@ -40,6 +38,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
 
     private MainActivityMVP.View view;
     private MainActivityMVP.DataManager dataManager;
+    Disposable disposable;
 
     public MainPresenter(MainActivityMVP.View activity) {
         view = activity;
@@ -51,7 +50,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
     }
 
     public void onCheckToken() {
-        dataManager
+         disposable = dataManager
                 .getServiceAccessToken()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -81,7 +80,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
 
     public void loadMoreUserFeedItems() {
         final UserFeed u = new UserFeed();
-        dataManager.getPostsWithLastComm(Utils.getLastCommCode(App.getNextFrom()))
+        disposable = dataManager.getPostsWithLastComm(Utils.getLastCommCode(App.getNextFrom()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -114,7 +113,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
     }
 
     public void getPostsWithLastComm() {
-        dataManager.getPostsWithLastComm(Utils.getLastCommCode(App.getNextFrom()))
+        disposable = dataManager.getPostsWithLastComm(Utils.getLastCommCode(App.getNextFrom()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -146,7 +145,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
 
 
     public void setLike(String type, int ownerId, final int itemId, String accessKey, final CheckCallback checkCallback) {
-        dataManager.setLike(type, ownerId, itemId, accessKey)
+        disposable = dataManager.setLike(type, ownerId, itemId, accessKey)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -174,7 +173,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
     }
 
     public void deleteLike(String type, int ownerId, int itemId, final CheckCallback checkCallback) {
-        dataManager.deleteLike(type, ownerId, itemId)
+        disposable = dataManager.deleteLike(type, ownerId, itemId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
@@ -195,7 +194,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable) {
                         view.networkError("Нет интернета");
                     }
                 });
@@ -203,7 +202,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
 
 
     public void longPollRequest() {
-        dataManager.getLongPollServer(0, "", 3)
+        disposable = dataManager.getLongPollServer(0, "", 3)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(new Function<AccessLongPull, Single<ResponseBody>>() {
@@ -243,6 +242,7 @@ public class MainPresenter extends MvpPresenter<MainActivityMVP.View> {
     @Override
     public void detachView() {
         super.detachView();
+        disposable.dispose();
         view = null;
     }
 

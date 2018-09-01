@@ -87,7 +87,7 @@ public class UserFeedFragment extends Fragment implements MainActivityMVP.View {
             public void onError(VKError error) {
                 Toast.makeText(getContext(), "Произошла ошибка во время авторизации", Toast.LENGTH_SHORT).show();
             }
-        })) ;
+        }));
 
         if (requestCode == 1) {
             try {
